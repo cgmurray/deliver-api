@@ -72,9 +72,19 @@ class BannerRepository extends ServiceEntityRepository
                     /* Use krsort (desc) so we can we can use pop instead of shift (faster) */
                     krsort($distances, SORT_NUMERIC);
                     $closestPoint1 = array_pop($distances);
+
+                    /* If the distance from customer to closest polygon point is within the
+                       service area, add the banner. */
+                    if ($closestPoint1 <= $radiusMeters) {
+                        $serviceAreaBanners[] = $banner;
+                        break;
+                    }
+
+                    /* Get the second closest point to create the closest line segment */
                     $closestPoint2 = array_pop($distances);
                     $closestSegment = new Line($closestPoint1, $closestPoint2);
 
+                    /* Get the closest distance between the customer and the line */
                     $perpendicularCalculator = new PerpendicularDistance();
                     $perpendicularDistance = $perpendicularCalculator->getPerpendicularDistance($customerPoint, $closestSegment);
 
